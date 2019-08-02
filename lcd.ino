@@ -7,13 +7,18 @@
 #endif
 
 #define PIN 5
-UTFT myGLCD(SSD1963_800480, 38, 39, 40, 41); 
+
+// Set the pins to the correct ones for your development shield
+// ------------------------------------------------------------
+// Standard Arduino Mega/Due shield            : <display model>,38,39,40,41
+UTFT myGLCD(SSD1963_800480, 38, 39, 40, 41); //(byte model, int RS, int WR, int CS, int RST, int SER)
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(60, PIN, NEO_GRB + NEO_KHZ800);
 
 
-UTouch  myTouch( 43, 42, 44, 45, 46); 
+UTouch  myTouch( 43, 42, 44, 45, 46);  //byte tclk, byte tcs, byte din, byte dout, byte irq
 
 
+// Declare which fonts we will be using
 extern uint8_t GroteskBold[];
 
 int x, y;
@@ -27,6 +32,9 @@ int x1 = 0;
 int c = 1, d = 0, e = 0 ;
 int paharbuton = 0;
 
+/*************************
+**   Custom functions   **
+*************************/
 void receiveEvent(int howMany) {
   while (1 < Wire.available()) { // loop through all but the last
     char c = Wire.read(); // receive byte as a character
@@ -59,7 +67,7 @@ void MeniuPrincipal()
   myGLCD.setColor(0, 0, 255);
   myGLCD.fillRoundRect (415 , 255, 770, 450);
   myGLCD.setColor(255, 255, 255);
-  myGLCD.print("Beta mode", 445, 320);
+  myGLCD.print("Reset par.", 445, 320);
   myGLCD.drawRoundRect (415, 255, 770, 450);
 
 }
@@ -212,51 +220,57 @@ void loop()
             x = y = 0;
           }
         }
-        if (rep)
+        if ((x >= 30) && (x <= 385)) // Upper row
         {
-          if ((x >= 30) && (x <= 385)) // Upper row
+          if ((y >= 255) && (y <= 450)) // Button: 2
           {
-            if ((y >= 255) && (y <= 450)) // Button: 2
+            rep = false;
+            x = y = 0;
+            x1 = 2;
+            Calibrare();
+            Serial.println(timp);         // print the integer
+
+            while (timp != 2)
             {
-              rep = false;
-              x = y = 0;
-              x1 = 2;
-              Calibrare();
-              Serial.println(timp);         // print the integer
+              ledefect();
+              myGLCD.fillScr(0, 0, 0);
+              myGLCD.setBackColor(0, 0, 255);
+              myGLCD.print("CALIBRARE", 65, 95);
+            }
+            Serial.println(timp);         // print the integer
 
-              while (timp != 2)
-              {
-                ledefect();
-                myGLCD.fillScr(0, 0, 0);
-                myGLCD.setBackColor(0, 0, 255);
-                myGLCD.print("CALIBRARE", 65, 95);
-              }
-              Serial.println(timp);         // print the integer
-
-              if (timp == 2)
-              {
-                MeniuPrincipal();
-                timp = -1;
-                rep = true;
-                delay(100);
-              }
+            if (timp == 2)
+            {
+              MeniuPrincipal();
+              timp = -1;
+              rep = true;
+              delay(100);
             }
           }
         }
-        if (rep)
+        if ((x >= 416) && (x <= 770)) // Upper row
         {
-          if ((x >= 416) && (x <= 770)) // Upper row
+          if ((y >= 30) && (y <= 225)) // Button: 2
           {
-            if ((y >= 30) && (y <= 225)) // Button: 2
-            {
-              rep = false;
-              x = y = 0;
-              MeniuManual();
-              c = 1;
-              e = 0;
-              repbackcal = true;
-            }
+            rep = false;
+            x = y = 0;
+            MeniuManual();
+            c = 1;
+            e = 0;
+            repbackcal = true;
+          }
 
+        }
+        if ((x >= 416) && (x <= 770)) // Upper row
+        { //  myGLCD.drawRoundRect (415, 255, 770, 450);
+
+          if ((y >= 225) && (y <= 450)) // Button: 2
+          {
+            Serial.print("yes");
+            Wire.beginTransmission(8);
+            Wire.write(10);              // sends one byte
+            Wire.endTransmission(8);    // stop transmitting
+            x = y = 0;
           }
         }
       }
@@ -405,6 +419,7 @@ void loop()
           if ((x >= 30) && (x <= 385)) // Button: 1
           {
             repback = false;
+            Serial.println(timp);
 
             paharbuton = digitalRead(2);
             while (paharbuton == 0)
@@ -420,8 +435,11 @@ void loop()
               Serial.print("DA12");
               //Serial.write(45); // send a byte with the value 45
               x1 = 1;
+
               Calibrare();
+
               paharbuton = 0;
+
               while (timp != 2)
               {
                 color(strip.Color(70, 255, 0)); // Green
@@ -430,6 +448,7 @@ void loop()
                 myGLCD.print("PREPARARE", 65, 95);
 
               }
+              Serial.println(timp);
               Serial.print("DA3312");
 
               for (int t = 1; t <= 4; t++)
@@ -493,12 +512,12 @@ void loop()
                 MeniuSec();
                 repback = true;
 
-              } 
+              }
             }
           }
         }
 
-                if ((x >= 415) && (x <= 770)) // Upper row
+        if ((x >= 415) && (x <= 770)) // Upper row
         {
           if ((y >= 30) && (y <= 225)) // Button: 2
 
@@ -542,7 +561,7 @@ void loop()
                 MeniuSec();
                 repback = true;
 
-              } 
+              }
             }
           }
         }
@@ -556,6 +575,7 @@ void loop()
             delay(100);
             MeniuPrincipal();
             rep = true;
+            x = y = 0;
 
           }
         }
