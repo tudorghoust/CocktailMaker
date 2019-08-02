@@ -32,9 +32,6 @@ int x1 = 0;
 int c = 1, d = 0, e = 0 ;
 int paharbuton = 0;
 
-/*************************
-**   Custom functions   **
-*************************/
 void receiveEvent(int howMany) {
   while (1 < Wire.available()) { // loop through all but the last
     char c = Wire.read(); // receive byte as a character
@@ -181,7 +178,7 @@ void setup()
   myGLCD.setBackColor(0, 0, 0);
 
   strip.begin();
-  strip.show(); // Initialize all pixels to 'off'
+  strip.show();
   MeniuPrincipal();
   Serial.begin(9600);
 
@@ -540,7 +537,7 @@ void loop()
               paharbuton = 0;
               while (timp != 2)
               {
-                color(strip.Color(70, 255, 0)); // Green
+                color(strip.Color(70, 255, 0)); // GOLD
                 myGLCD.fillScr(0, 0, 0);
                 myGLCD.setBackColor(0, 0, 255);
                 myGLCD.print("PREPARARE", 65, 95);
